@@ -425,7 +425,7 @@ body::after{content:none !important}
 }
 .card:hover{transform:translateY(-4px)}
 .card::after{
-  content:'♫';
+  content:'🪭';
   position:absolute;
   right:15px;
   top:12px;
