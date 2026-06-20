@@ -27,6 +27,25 @@ function parseTags(text) {
     .filter(function(t) { return t && t !== '-' && t !== '—' && t !== '標籤'; });
 }
 
+function applySiteSettings(rows) {
+  const title = cell(rows[1], 8) || '珞珞の歌單';
+  const subtitle = cell(rows[2], 8) || '不喜歡我就不要看我，再看戳你馬啾！不會的歌也可以詢問喔w';
+  const modalTitle = cell(rows[3], 8) || '🪭珞珞推薦';
+  const closeText = cell(rows[4], 8) || '我是女孩，沒有積極！';
+
+  const siteTitle = document.getElementById('siteTitle');
+  const siteSubtitle = document.getElementById('siteSubtitle');
+  const modalTitleEl = document.getElementById('modalTitle');
+  const closeModal = document.getElementById('closeModal');
+
+  if (siteTitle) siteTitle.textContent = title;
+  if (siteSubtitle) siteSubtitle.textContent = subtitle;
+  if (modalTitleEl) modalTitleEl.textContent = modalTitle;
+  if (closeModal) closeModal.textContent = closeText;
+
+  document.title = title;
+}
+
 function loadSheet() {
   const status = document.getElementById('status');
   status.textContent = '讀取中…';
@@ -41,6 +60,9 @@ function loadSheet() {
     clearTimeout(sheetTimeout);
     try {
       const rows = response && response.table && response.table.rows ? response.table.rows : [];
+
+      applySiteSettings(rows);
+
       const loadedSongs = [];
       const masterTags = [];
 
@@ -67,6 +89,7 @@ function loadSheet() {
       });
 
       songs = loadedSongs;
+
       if (masterTags.length) {
         tags = Array.from(new Set(masterTags));
       } else {
@@ -95,11 +118,13 @@ function loadSheet() {
   const script = document.createElement('script');
   script.id = 'sheetJsonp';
   script.src = url;
+
   script.onerror = function() {
     clearTimeout(sheetTimeout);
     showSheetError('讀取不到試算表，請確認共用權限是「知道連結的任何人可檢視」。');
     delete window[callbackName];
   };
+
   document.body.appendChild(script);
 
   sheetTimeout = setTimeout(function() {
@@ -119,6 +144,7 @@ function showSheetError(message) {
 function renderTags() {
   const box = document.getElementById('tags');
   box.innerHTML = '';
+
   tags.forEach(function(t, i) {
     const colors = palette[i % palette.length];
     const b = document.createElement('button');
@@ -126,11 +152,13 @@ function renderTags() {
     b.textContent = t;
     b.style.setProperty('--tag', colors[0]);
     b.style.setProperty('--tagLight', colors[1]);
+
     b.onclick = function() {
       activeTag = activeTag === t ? null : t;
       renderTags();
       renderSongs();
     };
+
     box.appendChild(b);
   });
 }
@@ -140,6 +168,7 @@ function matchSong(s) {
   const categories = parseTags(s.category);
   const text = (s.title + ' ' + s.artist + ' ' + s.category).toLowerCase();
   const tagOk = !activeTag || categories.includes(activeTag) || s.artist === activeTag || s.category.includes(activeTag);
+
   return tagOk && (!q || text.includes(q));
 }
 
@@ -150,6 +179,7 @@ function renderSongs() {
   grid.innerHTML = '';
 
   const list = songs.filter(matchSong);
+
   count.textContent = '共 ' + list.length + ' 首 / 全部 ' + songs.length + ' 首';
   empty.style.display = list.length ? 'none' : 'block';
 
@@ -174,8 +204,10 @@ function renderSongs() {
     copy.className = 'copy';
     copy.type = 'button';
     copy.textContent = '複製';
+
     copy.onclick = async function() {
       const text = s.title + ' - ' + s.artist;
+
       try {
         await navigator.clipboard.writeText(text);
       } catch (err) {
@@ -188,8 +220,10 @@ function renderSongs() {
         document.execCommand('copy');
         ta.remove();
       }
+
       copy.textContent = '✓ 已複製';
       copy.classList.add('done');
+
       setTimeout(function() {
         copy.textContent = '複製';
         copy.classList.remove('done');
@@ -197,12 +231,15 @@ function renderSongs() {
     };
 
     card.append(title, artist, cat, copy);
+
     if (s.link) {
       card.addEventListener('dblclick', function() {
         window.open(s.link, '_blank', 'noopener,noreferrer');
       });
+
       card.title = '雙擊開啟歌曲連結';
     }
+
     grid.appendChild(card);
   });
 }
@@ -214,9 +251,12 @@ document.getElementById('search').addEventListener('input', function(e) {
 
 document.getElementById('randomBtn').onclick = function(e) {
   e.preventDefault();
+
   const list = songs.filter(matchSong);
   if (!list.length) return;
+
   const s = list[Math.floor(Math.random() * list.length)];
+
   document.getElementById('pickSong').textContent = s.title;
   document.getElementById('pickArtist').textContent = s.artist + '｜' + (parseTags(s.category).join(' ') || '未分類');
   document.getElementById('modal').classList.add('show');
@@ -235,6 +275,7 @@ document.getElementById('modal').onclick = function(e) {
 (function floats() {
   const symbols = ['❀','☁','月','竹','卷','琴','✦'];
   const layer = document.getElementById('floatLayer');
+
   for (let i = 0; i < 32; i++) {
     const el = document.createElement('span');
     el.className = 'float';
