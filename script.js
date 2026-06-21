@@ -28,10 +28,21 @@ function parseTags(text) {
 }
 
 function applySiteSettings(rows) {
-  const title = cell(rows[1], 8) || '珞珞の歌單';
-  const subtitle = cell(rows[2], 8) || '不喜歡我就不要看我，再看戳你馬啾！不會的歌也可以詢問喔w';
-  const modalTitle = cell(rows[3], 8) || '🪭珞珞推薦';
-  const closeText = cell(rows[4], 8) || '我是女孩，沒有積極！';
+  const settings = {};
+
+  rows.forEach(function(row) {
+    const key = cell(row, 7);   // H欄：設定名稱
+    const value = cell(row, 8); // I欄：設定內容
+
+    if (key && value) {
+      settings[key] = value;
+    }
+  });
+
+  const title = settings['網站標題'] || '珞珞の歌單';
+  const subtitle = settings['網站小標題'] || '不喜歡我就不要看我，再看戳你馬啾！不會的歌也可以詢問喔w';
+  const modalTitle = settings['抽歌視窗標題'] || settings['彈窗標題'] || '🪭珞珞推薦';
+  const closeText = settings['關閉按鈕文字'] || settings['關閉按鈕'] || '我是女孩，沒有積極！';
 
   const siteTitle = document.getElementById('siteTitle');
   const siteSubtitle = document.getElementById('siteSubtitle');
@@ -58,6 +69,7 @@ function loadSheet() {
 
   window[callbackName] = function(response) {
     clearTimeout(sheetTimeout);
+
     try {
       const rows = response && response.table && response.table.rows ? response.table.rows : [];
 
@@ -78,6 +90,7 @@ function loadSheet() {
         });
 
         const looksLikeHeader = ['歌名', '歌曲', '曲名', 'title'].includes(title.toLowerCase());
+
         if (title && !looksLikeHeader) {
           loadedSongs.push({
             title: title,
@@ -94,22 +107,26 @@ function loadSheet() {
         tags = Array.from(new Set(masterTags));
       } else {
         const fromSongs = [];
+
         songs.forEach(function(s) {
           parseTags(s.category).forEach(function(t) {
             fromSongs.push(t);
           });
         });
+
         tags = Array.from(new Set(fromSongs));
       }
 
       status.textContent = '';
       renderTags();
       renderSongs();
+
     } catch (err) {
       console.error(err);
       showSheetError('試算表格式解析失敗，請確認 A欄歌名、B欄歌手、C欄分類、F欄標籤。');
     } finally {
       delete window[callbackName];
+
       const s = document.getElementById('sheetJsonp');
       if (s) s.remove();
     }
@@ -148,6 +165,7 @@ function renderTags() {
   tags.forEach(function(t, i) {
     const colors = palette[i % palette.length];
     const b = document.createElement('button');
+
     b.className = 'tag' + (activeTag === t ? ' active' : '');
     b.textContent = t;
     b.style.setProperty('--tag', colors[0]);
@@ -176,6 +194,7 @@ function renderSongs() {
   const grid = document.getElementById('grid');
   const empty = document.getElementById('empty');
   const count = document.getElementById('count');
+
   grid.innerHTML = '';
 
   const list = songs.filter(matchSong);
@@ -278,11 +297,13 @@ document.getElementById('modal').onclick = function(e) {
 
   for (let i = 0; i < 32; i++) {
     const el = document.createElement('span');
+
     el.className = 'float';
     el.textContent = symbols[i % symbols.length];
     el.style.setProperty('--left', Math.random() * 100 + '%');
     el.style.setProperty('--dur', (10 + Math.random() * 14) + 's');
     el.style.setProperty('--delay', (-Math.random() * 16) + 's');
+
     layer.appendChild(el);
   }
 })();
