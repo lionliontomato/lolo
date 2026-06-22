@@ -65,7 +65,9 @@ function loadSheet() {
   if (oldScript) oldScript.remove();
 
   const callbackName = 'playlistSheetCallback_' + Date.now();
-  const url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?gid=' + SHEET_GID + '&tqx=out:json;responseHandler:' + callbackName + '&t=' + Date.now();
+
+  // 加上 headers=0，避免 Google 試算表自動把 F2 當成標題列跳過
+  const url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?gid=' + SHEET_GID + '&headers=0&tqx=out:json;responseHandler:' + callbackName + '&t=' + Date.now();
 
   window[callbackName] = function(response) {
     clearTimeout(sheetTimeout);
@@ -83,7 +85,7 @@ function loadSheet() {
         const artist = cell(row, 1);
         const category = cell(row, 2);
         const link = cell(row, 3);
-        const masterTagCell = cell(row, 5);
+        const masterTagCell = cell(row, 5); // F欄：上方標籤
 
         parseTags(masterTagCell).forEach(function(t) {
           masterTags.push(t);
@@ -147,6 +149,9 @@ function loadSheet() {
   sheetTimeout = setTimeout(function() {
     showSheetError('讀取試算表逾時，請重新整理頁面或確認試算表權限。');
     delete window[callbackName];
+
+    const s = document.getElementById('sheetJsonp');
+    if (s) s.remove();
   }, 12000);
 }
 
