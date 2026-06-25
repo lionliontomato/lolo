@@ -40,7 +40,7 @@ function applySiteSettings(rows) {
   });
 
   const title = settings['網站標題'] || '珞珞の歌單';
-  const subtitle = settings['網站小標題'] || '不喜歡我就不要看我，再看戳你馬啾！不會的歌也可以詢問喔w';
+  const subtitle = settings['網站小標題'] || '';
   const modalTitle = settings['抽歌視窗標題'] || settings['彈窗標題'] || '🪭珞珞推薦';
   const closeText = settings['關閉按鈕文字'] || settings['關閉按鈕'] || '我是女孩，沒有積極！';
 
